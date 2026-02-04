@@ -89,7 +89,7 @@ def display_image_gallery(image_files):
                 
                 # Open and display the image
                 img = Image.open(image_file)
-                st.image(img, caption=f"{filename}", use_container_width=True)
+                st.image(img, caption=f"{filename}", width="stretch")
                 
                 # Display metadata
                 st.markdown(f"**Created:** {mod_time_str}")
@@ -117,7 +117,7 @@ def display_image_gallery(image_files):
                             
                             # Fallback: Display the image in a larger format inline
                             st.warning("Could not open in a new window. Displaying larger version here:")
-                            st.image(img, caption=f"{filename} ({img.width}×{img.height} pixels)", use_container_width=False)
+                            st.image(img, caption=f"{filename} ({img.width}×{img.height} pixels)", width="stretch")
                 
                 # Add a download button
                 with col2:
@@ -128,7 +128,7 @@ def display_image_gallery(image_files):
                             file_name=filename,
                             mime=f"image/{os.path.splitext(filename)[1][1:]}",
                             key=f"download_{i}", 
-                            use_container_width=True
+                            use_container_="stretch"
                         )
                 
                 # Add a delete button with confirmation

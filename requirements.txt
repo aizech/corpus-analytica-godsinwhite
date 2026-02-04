@@ -61,3 +61,5 @@ mcp>=1.0.0
 ddgs
 #duckduckgo-search
 youtube-transcript-api
+
+chonkie[semantic]

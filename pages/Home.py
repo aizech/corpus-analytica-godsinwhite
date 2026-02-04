@@ -171,7 +171,16 @@ async def body() -> None:
             
         # Only load chat history if messages list is empty (first load)
         if len(st.session_state["messages"]) == 0:
-            chat_history = halo.get_messages_for_session()
+            if hasattr(halo, "get_chat_history"):
+                try:
+                    chat_history = halo.get_chat_history()
+                except Exception as inner_e:
+                    if "session not found" in str(inner_e).lower():
+                        chat_history = []
+                    else:
+                        raise
+            else:
+                chat_history = []
             if len(chat_history) > 0:
                 logger.info("Loading chat history from database")
                 # Loop through the runs and add the messages to the messages list
@@ -187,7 +196,10 @@ async def body() -> None:
                         logger.warning(f"Error processing message: {e}")
                         continue
     except Exception as e:
-        logger.warning(f"Failed to load chat history: {e}")
+        if "session not found" in str(e).lower():
+            logger.info("No chat history found for this session")
+        else:
+            logger.warning(f"Failed to load chat history: {e}")
         # Initialize empty messages list if it doesn't exist
         if "messages" not in st.session_state:
             st.session_state["messages"] = []
@@ -401,7 +413,7 @@ async def body() -> None:
                                     # Calculate 50% of the container width
                                     col1, col2 = st.columns([1, 1])
                                     with col1:
-                                        st.image(img, caption=f"Chart: {img_filename}", use_container_width=True)
+                                        st.image(img, caption=f"Chart: {img_filename}", width="stretch")
                                         break
                                 except Exception as e:
                                     st.error(f"Error displaying chart: {e}")
@@ -430,7 +442,7 @@ async def body() -> None:
                         #            # Calculate 50% of the container width
                         #            col1, col2 = st.columns([1, 1])
                         #            with col1:
-                        #                st.image(img, caption=f"Generated Image: {img_filename}", use_container_width=True)
+                        #                st.image(img, caption=f"Generated Image: {img_filename}", width="stretch")
                         #        except Exception as e:
                         #            st.error(f"Error displaying sandbox image: {e}")
                         #    else:
@@ -454,7 +466,7 @@ async def body() -> None:
                                         # Calculate 50% of the container width
                                         col1, col2 = st.columns([1, 1])
                                         with col1:
-                                            st.image(img, caption=f"Image: {os.path.basename(full_path)}", use_container_width=True)
+                                            st.image(img, caption=f"Image: {os.path.basename(full_path)}", width="stretch")
                                             break  # Stop trying other paths once we find the image
                                     except Exception as e:
                                         continue  # Try next path

@@ -154,7 +154,16 @@ async def body() -> None:
     # Load agent runs (i.e. chat history) from memory if messages is not empty
     ####################################################################
     try:
-        chat_history = halo.get_messages_for_session()
+        if hasattr(halo, "get_chat_history"):
+            try:
+                chat_history = halo.get_chat_history()
+            except Exception as inner_e:
+                if "session not found" in str(inner_e).lower():
+                    chat_history = []
+                else:
+                    raise
+        else:
+            chat_history = []
         if len(chat_history) > 0:
             logger.info("Loading messages")
             # Clear existing messages
@@ -172,7 +181,10 @@ async def body() -> None:
                     logger.warning(f"Error processing message: {e}")
                     continue
     except Exception as e:
-        logger.warning(f"Failed to load chat history: {e}")
+        if "session not found" in str(e).lower():
+            logger.info("No chat history found for this session")
+        else:
+            logger.warning(f"Failed to load chat history: {e}")
         # Initialize empty messages list if it doesn't exist
         if "messages" not in st.session_state:
             st.session_state["messages"] = []
@@ -248,7 +260,7 @@ async def body() -> None:
                                 # Calculate 50% of the container width
                                 col1, col2 = st.columns([1, 1])
                                 with col1:
-                                    st.image(img, caption=f"Generated Image: {img_filename}", use_container_width=True)
+                                    st.image(img, caption=f"Generated Image: {img_filename}", width="stretch")
                             except Exception as e:
                                 st.error(f"Error displaying image: {e}")
                     
@@ -260,7 +272,7 @@ async def body() -> None:
                                 # Calculate 50% of the container width
                                 col1, col2 = st.columns([1, 1])
                                 with col1:
-                                    st.image(img, caption=f"Generated Image: {os.path.basename(img_path)}", use_container_width=True)
+                                    st.image(img, caption=f"Generated Image: {os.path.basename(img_path)}", width="stretch")
                             except Exception as e:
                                 st.error(f"Error displaying image: {e}")
                     
@@ -348,7 +360,7 @@ async def body() -> None:
                                         # Calculate 50% of the container width
                                         col1, col2 = st.columns([1, 1])
                                         with col1:
-                                            st.image(img, caption=f"Generated Image: {img_filename}", use_container_width=True)
+                                            st.image(img, caption=f"Generated Image: {img_filename}", width="stretch")
                                     except Exception as e:
                                         st.error(f"Error displaying image: {e}")
                             

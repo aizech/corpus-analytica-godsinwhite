@@ -107,11 +107,11 @@ def main():
                 st.image(
                     resized_image,
                     caption="Uploaded Medical Image",
-                    use_container_width=True,
+                    width="stretch",
                 )
 
                 analyze_button = st.button(
-                    ":material/search: Analyze Image", type="primary", use_container_width=True
+                    ":material/search: Analyze Image", type="primary", width="stretch"
                 )
 
                 additional_info = st.text_area(

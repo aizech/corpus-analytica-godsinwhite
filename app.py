@@ -32,11 +32,11 @@ pages = [
         title="Medical Image Analysis",
         icon=":material/diagnosis:"
     ),
-    st.Page(
-        "pages/Experts_Chat.py",
-        title="Experts Chat",
-        icon=":material/chat:"
-    ),
+    #st.Page(
+    #    "pages/Experts_Chat.py",
+    #    title="Experts Chat",
+    #    icon=":material/chat:"
+    #),
     st.Page(
         "pages/Generated_Images.py",
         title="Generated Images",

@@ -1,12 +1,12 @@
 <img src="assets/godsinwhite_team.png" alt="" width="400"/>
 
-# GodsinWhite
+# Corpus Analytica GodsinWhite
 
-GodsinWhite is an advanced medical AI platform and your personal gateway to advanced medical diagnostics—powered by AI and backed by real medical expertise. Designed for patients, healthcare professionals, and curious minds alike, this platform provides a powerful, multi-agent AI interface for medical assistance, diagnostics, image analysis, and research that transforms how medical images are analyzed and understood.
+Corpus Analytica GodsinWhite is an advanced medical AI platform and your personal gateway to advanced medical diagnostics—powered by AI and backed by real medical expertise. Designed for patients, healthcare professionals, and curious minds alike, this platform provides a powerful, multi-agent AI interface for medical assistance, diagnostics, image analysis, and research that transforms how medical images are analyzed and understood.
 
 ## Overview
 
-Built on the Agno framework, GodsinWhite orchestrates a team of specialized medical AI agents through the HALO Agent Interface (HALO). Each agent brings unique capabilities to the platform, from medical image analysis and PubMed research to data visualization and medical calculations.
+Built on the Agno framework, Corpus Analytica GodsinWhite orchestrates a team of specialized medical AI agents through the HALO Agent Interface (HALO). Each agent brings unique capabilities to the platform, from medical image analysis and PubMed research to data visualization and medical calculations.
 
 The platform features a modern, intuitive Streamlit interface with both light and dark themes, real-time streaming responses, and comprehensive medical knowledge integration through vector databases.
 
@@ -58,8 +58,8 @@ Take a look at the [live demo here](https://godsinwhite.streamlit.app/)
 1. **Clone the Repository**
 
 ```bash
-git clone https://github.com/aizech/godsinwhite.git
-cd godsinwhite
+git clone https://github.com/aizech/corpus-analytica-godsinwhite
+cd corpus-analytica-godsinwhite
 ```
 
 2. **Set Up Virtual Environment**
@@ -190,7 +190,7 @@ GodsinWhite features a team of specialized AI agents, each with distinct medical
 
 For support and questions:
 - Open an issue in the GitHub repository
-- Check the documentation in the `knowledge_docs` directory
+- Check the documentation in the `docs` directory
 - Join our community discussions
 
 ## Contributing

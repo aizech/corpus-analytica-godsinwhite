@@ -329,11 +329,13 @@ def get_memory_timestamp(halo_team, memory, user_id):
                 # Try to query the database for creation timestamp
                 try:
                     # Execute a raw SQL query to get the timestamp
-                    query = "SELECT created_at FROM agno_memories WHERE id = ? AND user_id = ?"
+                    query = "SELECT created_at FROM agno_memories WHERE memory_id = ? AND user_id = ?"
                     result = halo_team.db.connection.execute(query, (memory_id, user_id)).fetchone()
                     if result and result[0]:
                         from datetime import datetime
-                        if isinstance(result[0], str):
+                        if isinstance(result[0], (int, float)):
+                            timestamp = datetime.fromtimestamp(int(result[0]))
+                        elif isinstance(result[0], str):
                             timestamp = datetime.fromisoformat(result[0].replace('Z', '+00:00'))
                         else:
                             timestamp = result[0]
@@ -365,49 +367,57 @@ async def show_user_memories(halo_team, user_id: str) -> None:
         user_memories = []
         try:
             # Try multiple methods to get user memories
-            if hasattr(halo_team, 'get_user_memories'):
+            if hasattr(halo_team, 'db') and hasattr(halo_team.db, 'connection'):
+                try:
+                    query = "SELECT * FROM agno_memories WHERE user_id = ? ORDER BY created_at DESC"
+                    cursor = halo_team.db.connection.execute(query, (user_id,))
+                    rows = cursor.fetchall()
+                    if rows:
+                        user_memories = []
+                        for row in rows:
+                            # Agno 2.4.8 schema:
+                            # memory_id, memory(JSON), input, agent_id, team_id, user_id, topics(JSON), feedback, created_at(BIGINT), updated_at(BIGINT)
+                            raw_memory = row[1]
+                            try:
+                                memory_value = json.loads(raw_memory) if isinstance(raw_memory, str) else raw_memory
+                            except Exception:
+                                memory_value = raw_memory
+
+                            raw_topics = row[6]
+                            try:
+                                topics_value = json.loads(raw_topics) if isinstance(raw_topics, str) else (raw_topics or [])
+                            except Exception:
+                                topics_value = []
+
+                            memory_obj = type('Memory', (), {
+                                'memory_id': row[0],
+                                'memory': memory_value,
+                                'input': row[2],
+                                'agent_id': row[3],
+                                'team_id': row[4],
+                                'user_id': row[5],
+                                'topics': topics_value,
+                                'feedback': row[7],
+                                'created_at': row[8],
+                                'updated_at': row[9] if len(row) > 9 else None,
+                            })()
+                            user_memories.append(memory_obj)
+                        if user_memories:
+                            logger.info(f"Loaded {len(user_memories)} memories from database")
+                except Exception as e:
+                    logger.debug(f"Direct DB memory access failed: {e}")
+
+            # Fallback to Team method if direct access didn't return anything
+            if not user_memories and hasattr(halo_team, 'get_user_memories'):
                 try:
                     memories = halo_team.get_user_memories(user_id=user_id)
-                    if memories is not None:
+                    if memories:
                         user_memories = memories
                 except Exception as e:
                     logger.debug(f"get_user_memories failed: {e}")
-            
-            # If no memories from Team method, try database directly
-            if not user_memories and hasattr(halo_team, 'db'):
-                try:
-                    # Try to access memories directly from the database
-                    if hasattr(halo_team.db, 'get_user_memories'):
-                        memories = halo_team.db.get_user_memories(user_id=user_id)
-                        if memories:
-                            user_memories = memories
-                    elif hasattr(halo_team.db, 'connection'):
-                        # Direct SQL query as fallback
-                        query = "SELECT * FROM agno_memories WHERE user_id = ? ORDER BY created_at DESC"
-                        cursor = halo_team.db.connection.execute(query, (user_id,))
-                        rows = cursor.fetchall()
-                        if rows:
-                            # Convert rows to memory-like objects (simplified)
-                            user_memories = []
-                            for row in rows:
-                                # Create a simple object with the memory data
-                                memory_obj = type('Memory', (), {
-                                    'memory_id': row[0] if len(row) > 0 else None,
-                                    'memory': row[1] if len(row) > 1 else str(row),
-                                    'topics': [],
-                                    'user_id': user_id
-                                })()
-                                user_memories.append(memory_obj)
-                except Exception as e:
-                    logger.debug(f"Database direct access failed: {e}")
-            
-            # Ensure we always have a list
-            if user_memories is None:
-                user_memories = []
-                
         except Exception as e:
-            logger.error(f"Error getting user memories: {e}")
-            user_memories = []
+            logger.error(f"Error in memory retrieval logic: {e}")
+
             
         with st.expander(f"💭 Memories for {user_id}", expanded=False):
             # Debug: Log memory object attributes if memories exist
@@ -439,7 +449,7 @@ async def show_user_memories(halo_team, user_id: str) -> None:
                 # Display as an editable table with checkbox column
                 edited_data = st.data_editor(
                     memory_data,
-                    use_container_width=True,
+                    width="stretch",
                     column_config={
                         "Select": st.column_config.CheckboxColumn("Select", width="small"),
                         "Memory": st.column_config.TextColumn("Memory", width="medium", disabled=True),
@@ -573,10 +583,17 @@ async def show_user_memories(halo_team, user_id: str) -> None:
                                                             
                                                             for table_name in table_names:
                                                                 try:
-                                                                    query = f"DELETE FROM {table_name} WHERE id = ? AND user_id = ?"
-                                                                    cursor = halo_team.db.connection.execute(query, (memory_id, user_id))
-                                                                    rows_affected = cursor.rowcount
-                                                                    halo_team.db.connection.commit()
+                                                                    rows_affected = 0
+                                                                    try:
+                                                                        query = f"DELETE FROM {table_name} WHERE memory_id = ? AND user_id = ?"
+                                                                        cursor = halo_team.db.connection.execute(query, (memory_id, user_id))
+                                                                        rows_affected = cursor.rowcount
+                                                                        halo_team.db.connection.commit()
+                                                                    except Exception:
+                                                                        query = f"DELETE FROM {table_name} WHERE id = ? AND user_id = ?"
+                                                                        cursor = halo_team.db.connection.execute(query, (memory_id, user_id))
+                                                                        rows_affected = cursor.rowcount
+                                                                        halo_team.db.connection.commit()
                                                                     
                                                                     if rows_affected > 0:
                                                                         deleted_count += 1

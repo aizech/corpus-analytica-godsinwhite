@@ -23,6 +23,10 @@ from tools import get_toolkit
 from config import config
 import base64
 import json
+import sqlite3
+import time
+from datetime import datetime, timezone
+from uuid import uuid4
 
 
 cwd = Path(__file__).parent.resolve()
@@ -30,11 +34,180 @@ tmp_dir = cwd.joinpath("tmp")
 tmp_dir.mkdir(exist_ok=True, parents=True)
 
 # Define paths for storage, memory and knowledge
-SESSIONS_PATH = tmp_dir.joinpath("halo_sessions.db")
-MEMORY_PATH = tmp_dir.joinpath("halo_memory.db")
+DB_PATH = tmp_dir.joinpath("halo.db")
+SESSIONS_PATH = DB_PATH
+MEMORY_PATH = DB_PATH
 # Use a user-specific directory for knowledge to avoid permission issues
 KNOWLEDGE_PATH = Path(os.path.join(os.path.expanduser("~"), "halo_knowledge"))
 KNOWLEDGE_PATH.mkdir(exist_ok=True, parents=True)
+
+
+def ensure_memory_schema(db_path: Path) -> None:
+    """Ensure agno_memories table has the exact schema expected by current agno."""
+    try:
+        conn = sqlite3.connect(str(db_path))
+        try:
+            def _create_v2_table() -> None:
+                conn.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS agno_memories (
+                        memory_id VARCHAR NOT NULL PRIMARY KEY,
+                        memory JSON NOT NULL,
+                        input VARCHAR,
+                        agent_id VARCHAR,
+                        team_id VARCHAR,
+                        user_id VARCHAR,
+                        topics JSON,
+                        feedback VARCHAR,
+                        created_at BIGINT NOT NULL,
+                        updated_at BIGINT
+                    )
+                    """
+                )
+
+            def _table_exists(table_name: str) -> bool:
+                row = conn.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+                    (table_name,),
+                ).fetchone()
+                return row is not None
+
+            def _to_epoch(value) -> int:
+                now = int(time.time())
+                if value is None:
+                    return now
+                if isinstance(value, (int, float)):
+                    return int(value)
+                if isinstance(value, str):
+                    try:
+                        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                        if dt.tzinfo is None:
+                            dt = dt.replace(tzinfo=timezone.utc)
+                        return int(dt.timestamp())
+                    except Exception:
+                        try:
+                            return int(float(value))
+                        except Exception:
+                            return now
+                return now
+
+            if not _table_exists("agno_memories"):
+                _create_v2_table()
+                conn.commit()
+                logger.info(f"Verified memory schema for {db_path}")
+                return
+
+            cursor = conn.execute("PRAGMA table_info(agno_memories)")
+            existing_info = cursor.fetchall()
+            existing_columns = {row[1] for row in existing_info}
+            existing_pk = [row[1] for row in existing_info if row[5]]
+
+            required_columns = {
+                "memory_id",
+                "memory",
+                "input",
+                "agent_id",
+                "team_id",
+                "user_id",
+                "topics",
+                "feedback",
+                "created_at",
+                "updated_at",
+            }
+            needs_migration = (
+                not required_columns.issubset(existing_columns)
+                or existing_pk != ["memory_id"]
+            )
+
+            if not needs_migration:
+                logger.info(f"Verified memory schema for {db_path}")
+                return
+
+            legacy_table = f"agno_memories_legacy_{int(time.time())}"
+            conn.execute(f"ALTER TABLE agno_memories RENAME TO {legacy_table}")
+            _create_v2_table()
+
+            legacy_info = conn.execute(f"PRAGMA table_info({legacy_table})").fetchall()
+            legacy_columns = {row[1] for row in legacy_info}
+
+            rows = conn.execute(f"SELECT * FROM {legacy_table}").fetchall()
+            for row in rows:
+                row_dict = dict(zip([d[0] for d in conn.execute(f"SELECT * FROM {legacy_table} LIMIT 0").description], row))
+
+                memory_id = (
+                    row_dict.get("memory_id")
+                    or row_dict.get("id")
+                    or str(uuid4())
+                )
+
+                raw_memory = row_dict.get("memory")
+                if raw_memory is None:
+                    memory_json = json.dumps("")
+                elif isinstance(raw_memory, str):
+                    try:
+                        json.loads(raw_memory)
+                        memory_json = raw_memory
+                    except Exception:
+                        memory_json = json.dumps(raw_memory)
+                else:
+                    memory_json = json.dumps(raw_memory)
+
+                raw_topics = row_dict.get("topics")
+                topics_json = None
+                if raw_topics is not None:
+                    if isinstance(raw_topics, str):
+                        try:
+                            json.loads(raw_topics)
+                            topics_json = raw_topics
+                        except Exception:
+                            topics_json = json.dumps([raw_topics])
+                    else:
+                        topics_json = json.dumps(raw_topics)
+
+                created_at = _to_epoch(row_dict.get("created_at"))
+                updated_at = _to_epoch(row_dict.get("updated_at")) if "updated_at" in legacy_columns else created_at
+
+                conn.execute(
+                    """
+                    INSERT OR IGNORE INTO agno_memories (
+                        memory_id, memory, input, agent_id, team_id, user_id, topics, feedback, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        memory_id,
+                        memory_json,
+                        row_dict.get("input") if "input" in legacy_columns else None,
+                        row_dict.get("agent_id") if "agent_id" in legacy_columns else None,
+                        row_dict.get("team_id") if "team_id" in legacy_columns else None,
+                        row_dict.get("user_id"),
+                        topics_json,
+                        row_dict.get("feedback"),
+                        created_at,
+                        updated_at,
+                    ),
+                )
+
+            conn.commit()
+            logger.info(f"Verified memory schema for {db_path}")
+        finally:
+            conn.close()
+    except Exception as e:
+        logger.warning(f"Failed to ensure memory schema: {e}")
+
+
+def log_memory_schema(db_path: Path) -> None:
+    """Log current memory table schema for debugging."""
+    try:
+        conn = sqlite3.connect(str(db_path))
+        try:
+            columns = conn.execute("PRAGMA table_info(agno_memories)").fetchall()
+            count = conn.execute("SELECT COUNT(*) FROM agno_memories").fetchone()
+            logger.info(f"agno_memories columns: {columns}")
+            logger.info(f"agno_memories row count: {count[0] if count else 'unknown'}")
+        finally:
+            conn.close()
+    except Exception as e:
+        logger.warning(f"Failed to log memory schema: {e}")
 
 
 @dataclass
@@ -46,16 +219,20 @@ class HaloConfig:
 
 
 # Setup memory database
+ensure_memory_schema(MEMORY_PATH)
+halo_db = SqliteDb(db_file=str(DB_PATH), memory_table="agno_memories")
+logger.info(f"Using memory database: {DB_PATH}")
 halo_memory = MemoryManager(
-    db=SqliteDb(db_file=str(MEMORY_PATH)),
+    db=halo_db,
     # Select the model used for memory creation and updates. If unset, the default model of the Agent is used.
     #model=OpenAIChat(id="gpt-5-mini"),
     # You can also provide additional instructions for memory management
     additional_instructions="Store important user information and preferences to personalize interactions"
 )
+log_memory_schema(DB_PATH)
 
 # Setup sessions storage database
-halo_sessions = SqliteDb(db_file=str(SESSIONS_PATH))
+halo_sessions = halo_db
 
 # setup knowledge database
 try:
@@ -362,10 +539,10 @@ def create_halo(
         description=description,
         instructions=instructions,
         respond_directly=True,  # Team can respond directly without always delegating
-        delegate_task_to_all_members=False,  # Don't automatically delegate to all members
+        delegate_to_all_members=False,  # Don't automatically delegate to all members
         determine_input_for_members=True,  # Team determines what input each member gets
         #enable_team_history=True,
-        read_team_history=True,
+        read_chat_history=True,
         #num_of_interactions_from_history=3,
         show_members_responses=True,
         enable_user_memories=True,  # This enables memory functionality
