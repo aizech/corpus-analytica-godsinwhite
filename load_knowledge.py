@@ -2,7 +2,6 @@
 Load the Knowledge Base for the Halo Agent Interface
 """
 
-import os
 from pathlib import Path
 
 from rich.console import Console

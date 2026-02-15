@@ -4,7 +4,6 @@ This module provides a factory function to create a GPTImage1 agent.
 
 import sys
 import os
-from pathlib import Path
 from copy import deepcopy
 from textwrap import dedent
 

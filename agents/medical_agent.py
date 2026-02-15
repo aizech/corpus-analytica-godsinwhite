@@ -10,10 +10,17 @@ detailed professional analysis along with patient-friendly explanations.
 
 from pathlib import Path
 
-import sys
 import asyncio
-import os
-from pathlib import Path
+import sys
+
+from agno.agent import Agent
+from agno.knowledge.knowledge import Knowledge
+from agno.memory import MemoryManager
+from agno.models.base import Model
+from agno.models.openai import OpenAIResponses
+
+# from agno.tools.searxng import Searxng
+from agno.tools.pubmed import PubmedTools
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -21,14 +28,6 @@ load_dotenv(override=True)
 # Windows-specific asyncio policy for compatibility
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-from agno.agent import Agent
-from agno.knowledge.knowledge import Knowledge
-from agno.memory import MemoryManager
-from agno.models.base import Model
-
-# from agno.tools.searxng import Searxng
-from agno.tools.pubmed import PubmedTools
 
 # from agno.tools.openai import OpenAITools
 # from copy import deepcopy
@@ -102,11 +101,8 @@ Always answer in the same language as the user.
 # Combine prompts for the final instruction
 FULL_INSTRUCTIONS = BASE_PROMPT + ANALYSIS_TEMPLATE
 
+
 # Initialize the Medical Imaging Expert agent
-from agno.models.base import Model
-from agno.models.openai import OpenAIResponses
-
-
 def create_medical_imaging_agent(
     model: Model, memory: MemoryManager, knowledge: Knowledge
 ) -> Agent:
@@ -151,7 +147,6 @@ def create_medical_imaging_agent(
 
 # Create default agent instance for backward compatibility
 # Note: This is deprecated - use create_medical_imaging_agent() factory function instead
-from agno.models.openai import OpenAIResponses
 
 agent = Agent(
     name="Medical Imaging and Search Expert",

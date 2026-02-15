@@ -1,8 +1,5 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
 import datetime
-import os
 from config import config
 from dotenv import load_dotenv
 

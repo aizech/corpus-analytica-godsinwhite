@@ -141,7 +141,7 @@ class GPTImage1Tools(Toolkit):
                         except Exception as import_error:
                             log_debug(f"Could not import add_message: {import_error}")
 
-                        response_str += f"Image has been generated successfully and displayed in the chat.\n"
+                        response_str += "Image has been generated successfully and displayed in the chat.\n"
                     # Handle base64-encoded images (typical for gpt-image-1)
                     elif hasattr(img, "b64_json") and img.b64_json:
                         # Save the base64 image to a temporary file
@@ -165,7 +165,6 @@ class GPTImage1Tools(Toolkit):
                             # Create URLs for the local file
                             file_url = f"file://{img_path}"
                             # Also create a sandbox URL format that will be recognized by our UI
-                            sandbox_url = f"sandbox:/mnt/data/{img_id}.png"
 
                             # For the ImageArtifact, we'll only set the URL and not the binary content
                             # to avoid serialization issues. The image is already saved to disk.
@@ -203,7 +202,7 @@ class GPTImage1Tools(Toolkit):
                                 )
 
                             # Format the response
-                            response_str += f"Image has been generated successfully and displayed in the chat.\n"
+                            response_str += "Image has been generated successfully and displayed in the chat.\n"
                             response_str += f"The image captures: {prompt}\n"
                             response_str += f"The image is saved to: {img_path}\n"
                             log_debug(f"Saved base64 image to {img_path}")

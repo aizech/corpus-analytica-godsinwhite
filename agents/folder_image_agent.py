@@ -4,7 +4,6 @@ This module provides a factory function to create an agent that can display imag
 
 import sys
 import os
-from pathlib import Path
 from copy import deepcopy
 from textwrap import dedent
 

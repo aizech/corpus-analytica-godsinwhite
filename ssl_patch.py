@@ -23,7 +23,6 @@ os.environ["PYTHONHTTPSVERIFY"] = "0"
 # Patch requests library if available
 try:
     import requests
-    from requests.packages.urllib3.util import ssl_
 
     # Create a patched session class
     original_request = requests.Session.request
@@ -169,5 +168,5 @@ except ImportError:
 except Exception as e:
     print(f"Error patching DuckDuckGo search library: {e}")
 
-print(f"SSL certificate verification disabled")
+print("SSL certificate verification disabled")
 print(f"Using certificate file: {certifi.where()}")

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from config import config
 from agno.team import Team
 from agno.utils.log import logger
-from halo import HaloConfig, create_halo, halo_memory, show_scotty
+from halo import HaloConfig, create_halo
 from utils import (
     about,
     add_message,
@@ -68,7 +68,6 @@ async def body() -> None:
     # Initialize User and Session State
     ####################################################################
     # Get Windows username automatically
-    import os
 
     windows_username = "Ava"  # Default fallback
     try:
@@ -121,16 +120,16 @@ async def body() -> None:
         halo = create_halo(halo_config)
         st.session_state["halo"] = halo
         st.session_state["halo_config"] = halo_config
-        logger.info(f"---*--- HALO instance created ---*---")
+        logger.info("---*--- HALO instance created ---*---")
     else:
         halo = st.session_state["halo"]
-        logger.info(f"---*--- HALO instance exists ---*---")
+        logger.info("---*--- HALO instance exists ---*---")
 
     ####################################################################
     # Load Agent Session from the database
     ####################################################################
     try:
-        logger.info(f"---*--- Loading HALO session ---*---")
+        logger.info("---*--- Loading HALO session ---*---")
         try:
             st.session_state["session_id"] = halo.load_session()
         except TypeError as e:

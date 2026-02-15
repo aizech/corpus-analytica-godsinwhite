@@ -28,7 +28,7 @@ def create_pdf_analyst_agent(
         An Agent instance configured as a data analyst agent
     """
     # Create a copy of the model to avoid side effects of the model being modified
-    model_copy = deepcopy(model)
+    deepcopy(model)
 
     pdf_path = Path.cwd().joinpath("downloads", "medical_history.pdf")
 

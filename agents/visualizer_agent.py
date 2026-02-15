@@ -4,8 +4,6 @@ This module provides a factory function to create a data visualization agent.
 https://docs.agno.com/tools/visualization
 """
 
-from copy import deepcopy
-
 from agno.agent import Agent
 from agno.knowledge.knowledge import Knowledge
 from agno.memory import MemoryManager

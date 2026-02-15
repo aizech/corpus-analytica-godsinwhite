@@ -1,8 +1,9 @@
-import json
-import os
+import copy
 import importlib
 import inspect
-from typing import Any, Dict, List, Optional, Tuple
+import json
+import os
+from typing import Any, Dict, List, Optional
 
 import streamlit as st
 from agno.knowledge.document import Document
@@ -12,7 +13,6 @@ from agno.knowledge.reader.docx_reader import DocxReader
 from agno.knowledge.reader.pdf_reader import PDFReader
 from agno.knowledge.reader.text_reader import TextReader
 from agno.knowledge.reader.website_reader import WebsiteReader
-from agno.memory import MemoryManager
 from agno.team import Team
 from agno.utils.log import logger
 from halo import HaloConfig, create_halo
@@ -20,16 +20,13 @@ from config import config
 
 
 async def initialize_session_state():
-    logger.info(f"---*--- Initializing session state ---*---")
+    logger.info("---*--- Initializing session state ---*---")
     if "halo" not in st.session_state:
         st.session_state["halo"] = None
     if "session_id" not in st.session_state:
         st.session_state["session_id"] = None
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
-
-
-import copy
 
 
 async def add_message(
@@ -371,7 +368,7 @@ def get_memory_timestamp(halo_team, memory, user_id):
                 if timestamp:
                     try:
                         return timestamp.strftime("%Y-%m-%d %H:%M")
-                    except:
+                    except Exception:
                         return str(timestamp)
 
         return "No timestamp"
@@ -456,7 +453,7 @@ async def show_user_memories(halo_team, user_id: str) -> None:
         with st.expander(f"💭 Memories for {user_id}", expanded=False):
             # Debug: Log memory object attributes if memories exist
             if user_memories and len(user_memories) > 0:
-                first_memory = user_memories[0]
+                user_memories[0]
                 # logger.debug(f"UserMemory object attributes: {dir(first_memory)}")
                 # logger.debug(f"UserMemory object type: {type(first_memory)}")
                 # logger.debug(f"UserMemory object vars: {vars(first_memory) if hasattr(first_memory, '__dict__') else 'No __dict__'}")
@@ -624,7 +621,7 @@ async def show_user_memories(halo_team, user_id: str) -> None:
                                                     halo_team.db, "delete_user_memory"
                                                 ):
                                                     logger.info(
-                                                        f"Using db.delete_user_memory method"
+                                                        "Using db.delete_user_memory method"
                                                     )
                                                     try:
                                                         # Try with just memory_id (current Agno framework signature)
@@ -1018,7 +1015,7 @@ def display_tool_calls(tool_calls_container, tools):
                         expander_title = f":material/smart_toy: {member_id}"
                     elif is_memory_task:
                         expander_title = (
-                            f":material/network_intelligence_update: Updating Memory"
+                            ":material/network_intelligence_update: Updating Memory"
                         )
                     else:
                         # Format the tool name for better readability
@@ -1029,7 +1026,7 @@ def display_tool_calls(tool_calls_container, tools):
                 except Exception as e:
                     logger.debug(f"Error determining tool type: {e}")
                     # Fallback to a generic title with the raw tool name
-                    expander_title = f":material/construction: Tool Call"
+                    expander_title = ":material/construction: Tool Call"
 
                 if execution_time_str != "N/A":
                     expander_title += f" ({execution_time_str})"
@@ -1289,7 +1286,7 @@ async def session_selector(halo: Team, halo_config: HaloConfig) -> None:
 
         # Show the rename session widget if we have a valid session
         if st.session_state.get("session_id"):
-            container = st.sidebar.container()
+            st.sidebar.container()
     except Exception as e:
         logger.error(f"Error in session selector: {str(e)}")
         st.sidebar.error("Failed to load sessions")
@@ -1302,9 +1299,9 @@ def export_chat_history():
         str: Formatted markdown string of the chat history
     """
     if "messages" not in st.session_state or not st.session_state["messages"]:
-        return f"# HALO - Chat History\n\nNo messages to export."
+        return "# HALO - Chat History\n\nNo messages to export."
 
-    chat_text = f"# HALO - Chat History\n\n"
+    chat_text = "# HALO - Chat History\n\n"
     for msg in st.session_state["messages"]:
         role_label = "🤖 Assistant" if msg["role"] == "assistant" else "👤 User"
         chat_text += f"### {role_label}\n{msg['content']}\n\n"
@@ -1342,7 +1339,7 @@ async def utilities_widget(halo: Team) -> None:
         if st.button(":material/edit_square: New Chat"):
             restart_halo()
     with col2:
-        fn = f"halo_chat_history.md"
+        fn = "halo_chat_history.md"
         if "session_id" in st.session_state:
             fn = f"halo_{st.session_state['session_id']}.md"
         if st.download_button(

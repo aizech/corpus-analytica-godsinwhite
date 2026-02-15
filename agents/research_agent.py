@@ -3,10 +3,7 @@ Research Agent module.
 This module provides a factory function to create a research agent.
 """
 
-from copy import deepcopy
 from textwrap import dedent
-import sys
-import os
 
 from agno.agent import Agent
 from agno.knowledge.knowledge import Knowledge
