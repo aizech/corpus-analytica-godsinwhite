@@ -12,11 +12,13 @@ from agno.agent import Agent
 from agno.memory import MemoryManager
 from agno.knowledge.knowledge import Knowledge
 from agno.models.base import Model
-#from agno.tools.thinking import ThinkingTools
+
+# from agno.tools.thinking import ThinkingTools
 
 # Windows-specific event loop policy for asyncio compatibility
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import asyncio
+
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 # Add the parent directory to the path to import FolderImageDisplayTools
@@ -30,21 +32,21 @@ def create_folder_image_agent(
 ) -> Agent:
     """
     Create a folder image agent that can display images from folders.
-    
+
     Args:
         model: The model to use for the agent
         memory: The memory to use for the agent
         knowledge: The knowledge to use for the agent
-        
+
     Returns:
         An Agent instance configured as a folder image display agent
     """
     # Import FolderImageDisplayTools inside the function to avoid pickling issues
     from tools.folder_image_display import FolderImageDisplayTools
-    
+
     # Create a copy of the model to avoid side effects of the model being modified
     model_copy = deepcopy(model)
-    
+
     return Agent(
         name="FolderImageViewer",
         role="Display and manage images from folders",
@@ -76,4 +78,4 @@ def create_folder_image_agent(
             
             Always be helpful and provide clear feedback about the images you find and display!\
         """),
-        )
+    )

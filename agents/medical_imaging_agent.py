@@ -11,7 +11,6 @@ from agno.memory import MemoryManager
 from agno.models.base import Model
 from agno.tools.duckduckgo import DuckDuckGoTools
 
-
 # Base prompt that defines the agent's expertise and response structure
 BASE_PROMPT = """You are a highly skilled medical imaging expert with extensive knowledge in radiology 
 and diagnostic imaging. Your role is to provide comprehensive, accurate, and ethical analysis of medical images.
@@ -72,18 +71,18 @@ def create_medical_imaging_agent(
 ) -> Agent:
     """
     Create a medical imaging agent that can analyze various types of medical images.
-    
+
     Args:
         model: The model to use for the agent
         memory: The memory to use for the agent
         knowledge: The knowledge to use for the agent
-        
+
     Returns:
         An Agent instance configured as a medical imaging expert agent
     """
     # Create a copy of the model to avoid side effects of the model being modified
     model_copy = deepcopy(model)
-    
+
     return Agent(
         name="Medical Imaging Expert",
         role="Analyze and interpret medical images with professional expertise",
@@ -97,8 +96,8 @@ def create_medical_imaging_agent(
         description="You are a highly skilled medical imaging expert with extensive knowledge in radiology and diagnostic imaging.",
         instructions=FULL_INSTRUCTIONS,
         markdown=True,  # Enable markdown formatting for structured output
-        #add_history_to_messages=True,
+        # add_history_to_messages=True,
         add_history_to_context=True,
-        #add_datetime_to_instructions=True,
-        exponential_backoff=True
+        # add_datetime_to_instructions=True,
+        exponential_backoff=True,
     )

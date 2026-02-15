@@ -13,10 +13,11 @@ from agno.knowledge.knowledge import Knowledge
 from agno.memory import MemoryManager
 from agno.models.base import Model
 from agno.models.openai import OpenAIResponses
-#from agno.tools.duckduckgo import DuckDuckGoTools
-#from agno.tools.pubmed import PubmedTools
-#from agno.tools.openai import OpenAITools
-#from copy import deepcopy
+
+# from agno.tools.duckduckgo import DuckDuckGoTools
+# from agno.tools.pubmed import PubmedTools
+# from agno.tools.openai import OpenAITools
+# from copy import deepcopy
 
 
 def create_research_agent(
@@ -24,12 +25,12 @@ def create_research_agent(
 ) -> Agent:
     """
     Create a research agent that can search for and synthesize information.
-    
+
     Args:
         model: The model to use for the agent
         memory: The memory to use for the agent
         knowledge: The knowledge to use for the agent
-        
+
     Returns:
         An Agent instance configured as a research agent
     """
@@ -38,16 +39,16 @@ def create_research_agent(
         name="Research Agent",
         role="Conduct comprehensive research and produce in-depth reports",
         model=OpenAIResponses(id="gpt-5"),
-        #memory=memory,
+        # memory=memory,
         # Give the Agent the ability to update memories
         enable_agentic_memory=True,
         # OR - Run the MemoryManager automatically after each response
         enable_user_memories=True,
         knowledge=knowledge,
-        #tools=[ExaTools(num_results=3)],
+        # tools=[ExaTools(num_results=3)],
         # Use DirectWebSearchTool for more reliable web search
-        #tools=[DuckDuckGoTools()],
-        #tools=[Searxng(host="https://search.mdosch.de")],
+        # tools=[DuckDuckGoTools()],
+        # tools=[Searxng(host="https://search.mdosch.de")],
         tools=[{"type": "web_search_preview"}],
         description="You are a meticulous research analyst with expertise in synthesizing information from diverse sources. Your goal is to produce balanced, fact-based, and thoroughly documented reports on any topic requested.",
         instructions=[
@@ -85,8 +86,8 @@ def create_research_agent(
         - [Reference 2](link)
         - [Reference 3](link)
         """),
-        #add_history_to_messages=True,
+        # add_history_to_messages=True,
         add_history_to_context=True,
-        #add_datetime_to_instructions=True,
-        exponential_backoff=True
+        # add_datetime_to_instructions=True,
+        exponential_backoff=True,
     )

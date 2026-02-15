@@ -9,7 +9,6 @@ from PIL import Image as PILImage
 from config import config
 import datetime
 
-
 # Set page config
 st.set_page_config(
     page_title=f"{config.APP_NAME} - Medical Image Analysis",
@@ -18,10 +17,8 @@ st.set_page_config(
 )
 
 # Logo in sidebar
-st.logo(config.LOGO_TEXT_PATH,
-    size="large",
-    icon_image=config.LOGO_ICON_PATH
-)
+st.logo(config.LOGO_TEXT_PATH, size="large", icon_image=config.LOGO_ICON_PATH)
+
 
 def main():
     with st.sidebar:
@@ -41,13 +38,16 @@ def main():
         col1a, col2a = st.columns([1, 5])
 
         with col1a:
-            team_image = config.ASSETS_DIR / "godsinwhite_radiologist.png" 
+            team_image = config.ASSETS_DIR / "godsinwhite_radiologist.png"
             st.image(team_image, width=100)
         with col2a:
-            st.markdown("""
+            st.markdown(
+                """
             # Medical Imaging Diagnosis Agent  
             Upload a medical image for professional analysis
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
     # Create containers for better organization
     upload_container = st.container()
@@ -66,29 +66,32 @@ def main():
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
                 # Check if file is DICOM or regular image
-                file_extension = uploaded_file.name.split('.')[-1].lower()
+                file_extension = uploaded_file.name.split(".")[-1].lower()
 
-                if file_extension in ['dicom', 'dcm'] or uploaded_file.type == 'application/dicom':
+                if (
+                    file_extension in ["dicom", "dcm"]
+                    or uploaded_file.type == "application/dicom"
+                ):
                     # Handle DICOM files
                     try:
                         # Reset file pointer to beginning
                         uploaded_file.seek(0)
                         # Read the DICOM file
                         dicom_data = pydicom.dcmread(uploaded_file)
-                        
+
                         # Convert DICOM to array that PIL can handle
                         img_array = dicom_data.pixel_array
-                        
+
                         # Normalize the image for display
                         img_array = img_array / img_array.max() * 255
                         img_array = img_array.astype(np.uint8)
-                        
+
                         # Convert numpy array to PIL Image
                         pil_image = PILImage.fromarray(img_array)
 
                         # If grayscale, convert to RGB for better display
                         if len(img_array.shape) == 2:
-                            pil_image = pil_image.convert('RGB')
+                            pil_image = pil_image.convert("RGB")
 
                     except Exception as e:
                         st.error(f"Error processing DICOM file: {str(e)}")
@@ -96,7 +99,7 @@ def main():
                 else:
                     # Handle regular image files with PIL
                     pil_image = PILImage.open(uploaded_file)
-                
+
                 # Resize the image for display
                 width, height = pil_image.size
                 aspect_ratio = width / height
@@ -124,17 +127,30 @@ def main():
                 image_path = "temp_medical_image.png"
                 # Save the resized image
                 resized_image.save(image_path, format="PNG")
-                
+
                 # Add DICOM metadata to additional info if available
-                if file_extension == 'dicom' or uploaded_file.type == 'application/dicom':
+                if (
+                    file_extension == "dicom"
+                    or uploaded_file.type == "application/dicom"
+                ):
                     try:
                         uploaded_file.seek(0)
                         dicom_data = pydicom.dcmread(uploaded_file)
                         dicom_info = f"\n\nDICOM Metadata:\n"
-                        for tag in ['PatientID', 'PatientName', 'PatientAge', 'PatientSex', 'Modality', 'StudyDescription']:
-                            if hasattr(dicom_data, tag) and getattr(dicom_data, tag) != '':
+                        for tag in [
+                            "PatientID",
+                            "PatientName",
+                            "PatientAge",
+                            "PatientSex",
+                            "Modality",
+                            "StudyDescription",
+                        ]:
+                            if (
+                                hasattr(dicom_data, tag)
+                                and getattr(dicom_data, tag) != ""
+                            ):
                                 dicom_info += f"- {tag}: {getattr(dicom_data, tag)}\n"
-                        
+
                         if additional_info:
                             additional_info += dicom_info
                         else:

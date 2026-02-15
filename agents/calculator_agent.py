@@ -17,18 +17,18 @@ def create_calculator_agent(
 ) -> Agent:
     """
     Create a calculator agent that can perform mathematical operations.
-    
+
     Args:
         model: The model to use for the agent
         memory: The memory to use for the agent
         knowledge: The knowledge to use for the agent
-        
+
     Returns:
         An Agent instance configured as a calculator agent
     """
     # Create a copy of the model to avoid side effects of the model being modified
     model_copy = deepcopy(model)
-    
+
     return Agent(
         name="Calculator",
         role="Answer mathematical questions and perform precise calculations",

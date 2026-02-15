@@ -12,11 +12,13 @@ from agno.agent import Agent
 from agno.memory import MemoryManager
 from agno.knowledge.knowledge import Knowledge
 from agno.models.base import Model
-#from agno.tools.thinking import ThinkingTools
+
+# from agno.tools.thinking import ThinkingTools
 
 # Windows-specific event loop policy for asyncio compatibility
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import asyncio
+
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 # Add the parent directory to the path to import GPTImage1Tools
@@ -30,12 +32,12 @@ def create_gptimage1_agent(
 ) -> Agent:
     """
     Create a gptimage1 agent that can generate images.
-    
+
     Args:
         model: The model to use for the agent
         memory: The memory to use for the agent
         knowledge: The knowledge to use for the agent
-        
+
     Returns:
         An Agent instance configured as a gptimage1 agent
     """
@@ -44,7 +46,7 @@ def create_gptimage1_agent(
 
     # Create a copy of the model to avoid side effects of the model being modified
     model_copy = deepcopy(model)
-    
+
     return Agent(
         name="GPTImage1",
         role="Generate images",
@@ -76,4 +78,4 @@ def create_gptimage1_agent(
             I've generated an image based on your request: {prompt}
             The image is saved to: {ImageArtifact.url}
         """),
-        )
+    )
