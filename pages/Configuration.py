@@ -3,10 +3,6 @@ import json
 import os
 import sys
 import dotenv
-import importlib
-import inspect
-import datetime
-from pathlib import Path
 
 # Add the parent directory to the path to import config
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -201,7 +197,6 @@ def main():
                 # Display agents in a simpler layout to avoid nesting issues
                 with agent_container:
                     # Create a simple grid using HTML/CSS
-                    agent_html = "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px;'>"
 
                     # Create checkboxes for each agent without using columns
                     for agent_name, agent_id in AGENT_OPTIONS.items():

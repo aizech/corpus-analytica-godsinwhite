@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
 from typing import List, Optional
+import streamlit as st
 
 from agents import get_agent
 from agno.agent import Agent
@@ -510,10 +511,16 @@ def create_halo(
     if provider == "openai":
         model = OpenAIChat(id=model_name)
     elif provider == "google":
+        from agno.models.google import Gemini
+
         model = Gemini(id=model_name)
     elif provider == "anthropic":
+        from agno.models.anthropic import Claude
+
         model = Claude(id=model_name)
     elif provider == "groq":
+        from agno.models.groq import Groq
+
         model = Groq(id=model_name)
     else:
         raise ValueError(f"Unsupported model provider: {provider}")

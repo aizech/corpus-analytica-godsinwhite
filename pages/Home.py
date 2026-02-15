@@ -9,13 +9,12 @@ from agno.utils.log import logger
 
 # TeamRunEvent is not needed as an import - using string constants for event types
 from agno.media import Image
-from halo import HaloConfig, create_halo, halo_memory, show_scotty
+from halo import HaloConfig, create_halo
 from utils import (
     about,
     add_message,
     display_tool_calls,
     example_inputs,
-    initialize_session_state,
     knowledge_widget,
     selected_agents,
     selected_model,
@@ -82,7 +81,6 @@ async def body() -> None:
     # Initialize User and Session State
     ####################################################################
     # Get Windows username automatically
-    import os
 
     windows_username = "Ava"  # Default fallback
     try:
@@ -118,7 +116,7 @@ async def body() -> None:
     # Generate or retrieve session ID
     ####################################################################
     try:
-        logger.info(f"---*--- Managing HALO session ---*---")
+        logger.info("---*--- Managing HALO session ---*---")
         # Generate session ID if not already present
         if (
             "session_id" not in st.session_state
@@ -157,10 +155,10 @@ async def body() -> None:
         halo = create_halo(halo_config, session_id=session_id)
         st.session_state["halo"] = halo
         st.session_state["halo_config"] = halo_config
-        logger.info(f"---*--- HALO instance created ---*---")
+        logger.info("---*--- HALO instance created ---*---")
     else:
         halo = st.session_state["halo"]
-        logger.info(f"---*--- HALO instance exists ---*---")
+        logger.info("---*--- HALO instance exists ---*---")
 
     logger.info(f"---*--- HALO session: {st.session_state.get('session_id')} ---*---")
 
@@ -239,7 +237,7 @@ async def body() -> None:
             for uploaded_file in prompt.files:
                 # Create unique filename to prevent overwriting
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-                file_extension = os.path.splitext(uploaded_file.name)[1]
+                os.path.splitext(uploaded_file.name)[1]
                 unique_filename = f"{timestamp}_{uploaded_file.name}"
                 file_path = os.path.join(uploads_dir, unique_filename)
 
@@ -343,7 +341,6 @@ async def body() -> None:
 
                     # Check for image links in the content
                     import re
-                    import os
                     from PIL import Image as PILImage
 
                     # from PIL import Image
@@ -518,7 +515,7 @@ async def body() -> None:
                                                 width="stretch",
                                             )
                                             break  # Stop trying other paths once we find the image
-                                    except Exception as e:
+                                    except Exception:
                                         continue  # Try next path
 
     ####################################################################

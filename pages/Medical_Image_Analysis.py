@@ -1,5 +1,4 @@
 import os
-import io
 import streamlit as st
 import pydicom
 import numpy as np
@@ -7,7 +6,6 @@ from agno.media import Image as AgnoImage
 from agents.medical_agent import agent
 from PIL import Image as PILImage
 from config import config
-import datetime
 
 # Set page config
 st.set_page_config(
@@ -136,7 +134,7 @@ def main():
                     try:
                         uploaded_file.seek(0)
                         dicom_data = pydicom.dcmread(uploaded_file)
-                        dicom_info = f"\n\nDICOM Metadata:\n"
+                        dicom_info = "\n\nDICOM Metadata:\n"
                         for tag in [
                             "PatientID",
                             "PatientName",
