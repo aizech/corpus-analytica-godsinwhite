@@ -13,17 +13,14 @@ from config import config
 
 # Set page config
 st.set_page_config(
-    page_title="GodsinWhite About", 
+    page_title="GodsinWhite About",
     page_icon=config.LOGO_ICON_PATH,
     layout="wide",
-    #initial_sidebar_state="collapsed"
+    # initial_sidebar_state="collapsed"
 )
 
 # Logo in sidebar
-st.logo(config.LOGO_TEXT_PATH,
-    size="large",
-    icon_image=config.LOGO_ICON_PATH
-)
+st.logo(config.LOGO_TEXT_PATH, size="large", icon_image=config.LOGO_ICON_PATH)
 
 # Page title
 one_cola = st.columns([1])[0]
@@ -31,14 +28,17 @@ with one_cola:
     col1a, col2a = st.columns([2, 6])
 
     with col1a:
-        #team_image = config.LOGO_TEAM_PATH
+        # team_image = config.LOGO_TEAM_PATH
         st.image(config.LOGO_TEAM_PATH, width=400)
-        #st.image(team_image, width=400)
+        # st.image(team_image, width=400)
     with col2a:
-        st.markdown("""
+        st.markdown(
+            """
         # Gods in White  
          *A Corpus Analytica Innovation*
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
 height = 50
 st.markdown(f'<div style="height: {height}px;"></div>', unsafe_allow_html=True)
@@ -69,4 +69,3 @@ Your health is invaluable. With Corpus Analytica, discover a smarter, safer, and
 
 height = 50
 st.markdown(f'<div style="height: {height}px;"></div>', unsafe_allow_html=True)
-

@@ -18,12 +18,12 @@ def create_pdf_analyst_agent(
 ) -> Agent:
     """
     Create a PDF analyst agent that can analyze PDF files and extract insights.
-    
+
     Args:
         model: The model to use for the agent
         memory: The memory to use for the agent
         knowledge: The knowledge to use for the agent
-        
+
     Returns:
         An Agent instance configured as a data analyst agent
     """
@@ -34,15 +34,15 @@ def create_pdf_analyst_agent(
 
     # Download the file using the download_file function
     download_file(
-        "https://github.com/aizech/godsinwhite/blob/main/demo_data/medical_history.pdf", str(pdf_path)
+        "https://github.com/aizech/godsinwhite/blob/main/demo_data/medical_history.pdf",
+        str(pdf_path),
     )
 
-    #agent.print_response(
+    # agent.print_response(
     #    "Summarize the contents of the attached file.",
     #    files=[File(filepath=pdf_path)],
-    #)
-    #agent.print_response("Suggest me a recipe from the attached file.")
-
+    # )
+    # agent.print_response("Suggest me a recipe from the attached file.")
 
     return Agent(
         name="PDF Analyst",

@@ -11,23 +11,24 @@ from agno.memory import MemoryManager
 from agno.models.base import Model
 from agno.tools.duckdb import DuckDbTools
 
+
 def create_data_analyst_agent(
     model: Model, memory: MemoryManager, knowledge: Knowledge
 ) -> Agent:
     """
     Create a data analyst agent that can analyze data sets and extract insights.
-    
+
     Args:
         model: The model to use for the agent
         memory: The memory to use for the agent
         knowledge: The knowledge to use for the agent
-        
+
     Returns:
         An Agent instance configured as a data analyst agent
     """
     # Create a copy of the model to avoid side effects of the model being modified
     model_copy = deepcopy(model)
-    
+
     return Agent(
         name="Data Analyst",
         role="Analyze data sets and extract meaningful insights",
